@@ -1,44 +1,44 @@
 # Dependencies
-**/node_modules/
-**/package-lock.json
-**/yarn.lock
+node_modules/
+package-lock.json
+yarn.lock
 
 # Compiled output
-**/dist/
-**/tmp/
-**/out-tsc/
-**/bazel-out/
-**/.angular/cache
+dist/
+tmp/
+out-tsc/
+bazel-out/
+.angular/cache
 
 # Logs
-**/npm-debug.log*
-**/yarn-debug.log*
-**/yarn-error.log*
-**/logs
-**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs
+*.log
 
 # IDEs and editors
-**/.idea/
-**/.project
-**/.classpath
-**/.c9/
-**/*.launch
-**/.settings/
-**/*.sublime-workspace
-**/.vscode/*
-!**/.vscode/settings.json
-!**/.vscode/tasks.json
-!**/.vscode/launch.json
-!**/.vscode/extensions.json
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
 # Misc
-**/.sass-cache
-**/connect.lock
-**/coverage
-**/libpeerconnection.log
-**/testem.log
-**/typings
+.sass-cache
+connect.lock
+coverage
+libpeerconnection.log
+testem.log
+typings
 
 # System Files
-**/.DS_Store
-**/Thumbs.db
+.DS_Store
+Thumbs.db
