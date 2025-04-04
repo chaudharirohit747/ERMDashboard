@@ -42,3 +42,5 @@ typings
 # System Files
 .DS_Store
 Thumbs.db
+frontend/.angular/cache/16.2.16/angular-webpack
+frontend/.angular/cache/16.2.16/babel-webpack
