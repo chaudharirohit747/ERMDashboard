@@ -1,0 +1,54 @@
+.employee-form {
+  padding: 1rem;
+  min-width: 500px;
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+  }
+
+  mat-dialog-content {
+    min-width: 500px;
+    max-height: none;
+    padding-top: 20px;
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+
+      mat-form-field {
+        flex: 1;
+      }
+    }
+  }
+
+  mat-dialog-actions {
+    margin: 1rem -1rem -1rem;
+    padding: 16px 0;
+    background-color: #f8f9fa;
+    margin: 0;
+
+    button {
+      min-width: 100px;
+
+      &:not(:last-child) {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .employee-form {
+    mat-dialog-content {
+      min-width: auto;
+
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+  }
+}

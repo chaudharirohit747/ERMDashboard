@@ -1,0 +1,31 @@
+<div class="leave-management-container">
+  <div class="header">
+    <h1>Leave Management</h1>
+    <button mat-raised-button color="primary" (click)="onRequestLeave()">
+      <mat-icon>add</mat-icon>
+      Request Leave
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="content">
+    <mat-card class="leave-balance">
+      <mat-card-header>
+        <mat-card-title>Leave Balance</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <app-leave-balance></app-leave-balance>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="leave-requests">
+      <mat-card-header>
+        <!-- <mat-card-title>Leave Requests</mat-card-title> -->
+      </mat-card-header>
+      <mat-card-content>
+        <app-leave-list></app-leave-list>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

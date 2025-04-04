@@ -1,0 +1,98 @@
+<div class="employee-form">
+  <h2 mat-dialog-title>{{ isEdit ? 'Edit' : 'Add' }} Employee</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-dialog-content>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>First Name</mat-label>
+          <input matInput formControlName="firstName" placeholder="Enter first name">
+          <mat-error *ngIf="form.get('firstName')?.hasError('required')">
+            First name is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Last Name</mat-label>
+          <input matInput formControlName="lastName" placeholder="Enter last name">
+          <mat-error *ngIf="form.get('lastName')?.hasError('required')">
+            Last name is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="Enter email">
+          <mat-error *ngIf="form.get('email')?.hasError('required')">
+            Email is required
+          </mat-error>
+          <mat-error *ngIf="form.get('email')?.hasError('email')">
+            Please enter a valid email
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone" placeholder="Enter phone number">
+          <mat-error *ngIf="form.get('phone')?.hasError('required')">
+            Phone number is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Department</mat-label>
+          <mat-select formControlName="departmentId">
+            <mat-option *ngFor="let dept of departments$ | async" [value]="dept.id">
+              {{dept.name}}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('departmentId')?.hasError('required')">
+            Department is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Position</mat-label>
+          <input matInput formControlName="position" placeholder="Enter position">
+          <mat-error *ngIf="form.get('position')?.hasError('required')">
+            Position is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Hire Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="hireDate">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="form.get('hireDate')?.hasError('required')">
+            Hire date is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Salary</mat-label>
+          <input matInput type="number" formControlName="salary" placeholder="Enter salary">
+          <mat-error *ngIf="form.get('salary')?.hasError('required')">
+            Salary is required
+          </mat-error>
+          <mat-error *ngIf="form.get('salary')?.hasError('min')">
+            Salary must be greater than 0
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+        {{ isEdit ? 'Update' : 'Add' }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

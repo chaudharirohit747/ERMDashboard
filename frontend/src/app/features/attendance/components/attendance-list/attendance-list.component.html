@@ -1,0 +1,158 @@
+<div class="attendance-container">
+  <!-- Quick Actions Card -->
+  <div class="quick-actions-card">
+    <div class="time-display">
+      <div class="current-time">{{currentTime | date:'shortTime'}}
+        <span class="period">{{currentTime | date:'a'}}</span>
+      </div>
+      <div class="date">{{currentTime | date:'EEEE, MMMM d, yyyy'}}</div>
+      <div class="duration" *ngIf="todayRecord?.checkIn">
+        <mat-icon>timer</mat-icon>
+        <span>{{calculateDuration(todayRecord?.checkIn)}} hours</span>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button mat-flat-button color="primary" (click)="checkIn()" 
+              [disabled]="todayRecord?.checkIn" class="action-button check-in">
+        <mat-icon>login</mat-icon>
+        <span>Check In</span>
+      </button>
+      <button mat-flat-button color="warn" (click)="checkOut(todayRecord?.id!)" 
+              [disabled]="!todayRecord?.checkIn" class="action-button check-out">
+        <mat-icon>logout</mat-icon>
+        <span>Check Out</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <mat-card class="stats-card">
+      <div class="stats-icon personal">
+        <mat-icon>person</mat-icon>
+      </div>
+      <div class="stats-content">
+        <div class="stats-header">
+          <span class="stats-title">My Hours</span>
+          <span class="stats-percentage" [class.positive]="stats.myPercentage >= 90">{{stats.myPercentage}}%</span>
+        </div>
+        <div class="stats-value">{{stats.myHours}}h</div>
+        <mat-progress-bar mode="determinate" [value]="stats.myPercentage"></mat-progress-bar>
+      </div>
+    </mat-card>
+
+    <mat-card class="stats-card">
+      <div class="stats-icon team">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div class="stats-content">
+        <div class="stats-header">
+          <span class="stats-title">Team Average</span>
+          <span class="stats-percentage" [class.positive]="stats.teamPercentage >= 90">{{stats.teamPercentage}}%</span>
+        </div>
+        <div class="stats-value">{{stats.teamHours}}h</div>
+        <mat-progress-bar mode="determinate" [value]="stats.teamPercentage"></mat-progress-bar>
+      </div>
+    </mat-card>
+
+    <mat-card class="stats-card">
+      <div class="stats-icon weekly">
+        <mat-icon>date_range</mat-icon>
+      </div>
+      <div class="stats-content">
+        <div class="stats-header">
+          <span class="stats-title">Last Week</span>
+          <span class="stats-percentage" [class.positive]="stats.lastWeekPercentage >= 90">{{stats.lastWeekPercentage}}%</span>
+        </div>
+        <div class="stats-value">{{stats.lastWeekHours}}h</div>
+        <mat-progress-bar mode="determinate" [value]="stats.lastWeekPercentage"></mat-progress-bar>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Attendance Log Section -->
+  <mat-card class="attendance-log">
+    <mat-card-header>
+      <mat-card-title>Attendance Log</mat-card-title>
+      <div class="header-actions">
+        <mat-button-toggle-group value="30days">
+          <mat-button-toggle value="30days">30 Days</mat-button-toggle>
+          <mat-button-toggle value="calendar">Calendar</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="month-nav">
+        <button mat-stroked-button class="month-chip active">30 DAYS</button>
+        <button mat-stroked-button class="month-chip">MAR</button>
+        <button mat-stroked-button class="month-chip">FEB</button>
+        <button mat-stroked-button class="month-chip">JAN</button>
+        <button mat-stroked-button class="month-chip">DEC</button>
+      </div>
+
+      <table mat-table [dataSource]="attendanceRecords" class="attendance-table">
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let record">
+            <div class="date-cell">
+              <span class="day">{{record.date | date:'dd'}}</span>
+              <span class="month-year">{{record.date | date:'MMM yyyy'}}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Progress Column -->
+        <ng-container matColumnDef="progress">
+          <th mat-header-cell *matHeaderCellDef>Work Hours</th>
+          <td mat-cell *matCellDef="let record">
+            <div class="progress-cell">
+              <div class="progress-bar" [style.width.%]="getAttendanceBarWidth(record)"></div>
+              <span class="hours">{{record.workHours || 0}}h</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let record">
+            <div class="status-chip" [class]="record.status">
+              {{record.status | titlecase}}
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let record">
+            <button mat-icon-button [matMenuTriggerFor]="menu" class="action-menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item>
+                <mat-icon>info</mat-icon>
+                <span>Details</span>
+              </button>
+              <button mat-menu-item *ngIf="isAdmin">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['date', 'progress', 'status', 'actions']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['date', 'progress', 'status', 'actions'];"></tr>
+      </table>
+
+      <!-- Loading Spinner -->
+      <div class="loading-shade" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

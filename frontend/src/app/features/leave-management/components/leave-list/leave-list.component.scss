@@ -1,0 +1,122 @@
+.leave-container {
+  padding: 24px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    button {
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .content {
+    display: grid;
+    gap: 24px;
+
+    .leave-list {
+      mat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+
+        .header-actions {
+          margin-left: auto;
+        }
+      }
+
+      .table-container {
+        position: relative;
+        min-height: 200px;
+        overflow: auto;
+
+        table {
+          width: 100%;
+          background-color: white;
+          border-radius: 4px;
+          overflow: hidden;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+          .mat-row {
+            &:hover {
+              background-color: #f5f5f5;
+            }
+          }
+
+          .mat-column-actions {
+            width: 100px;
+            text-align: center;
+          }
+
+          .mat-column-status {
+            width: 120px;
+          }
+
+          .mat-column-duration {
+            width: 80px;
+            text-align: center;
+          }
+
+          th {
+            font-weight: 500;
+            color: #333;
+            background-color: #f5f5f5;
+          }
+
+          td {
+            color: #666;
+          }
+
+          .mat-chip {
+            min-width: 80px;
+            justify-content: center;
+          }
+        }
+
+        .loading-shade {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.15);
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .no-data {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 200px;
+          color: rgba(0, 0, 0, 0.54);
+          text-align: center;
+          padding: 20px;
+          font-size: 16px;
+          color: #666;
+        }
+
+        .loading-spinner {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+      }
+    }
+  }
+}

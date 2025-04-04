@@ -1,0 +1,81 @@
+<div class="reports-container">
+  <div class="header">
+    <h1>Reports</h1>
+  </div>
+
+  <div class="reports-grid">
+    <!-- Employee Summary Report -->
+    <mat-card class="report-card">
+      <mat-card-header>
+        <mat-card-title>Employee Summary</mat-card-title>
+        <mat-card-subtitle>Overview of all employees</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Generate a comprehensive report of all employees including their departments, roles, and contact information.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="generateReport('employee-summary')">
+          Generate Report
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Department Analytics -->
+    <mat-card class="report-card">
+      <mat-card-header>
+        <mat-card-title>Department Analytics</mat-card-title>
+        <mat-card-subtitle>Department-wise statistics</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>View detailed analytics about departments including employee count, performance metrics, and budget allocation.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="generateReport('department-analytics')">
+          Generate Report
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Attendance Report -->
+    <mat-card class="report-card">
+      <mat-card-header>
+        <mat-card-title>Attendance Report</mat-card-title>
+        <mat-card-subtitle>Monthly attendance summary</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Generate attendance reports for all employees including leaves, work hours, and overtime details.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="generateReport('attendance')">
+          Generate Report
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Performance Review -->
+    <mat-card class="report-card">
+      <mat-card-header>
+        <mat-card-title>Performance Review</mat-card-title>
+        <mat-card-subtitle>Employee performance metrics</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Analyze employee performance based on various metrics, goals, and achievements.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="generateReport('performance')">
+          Generate Report
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Report Generation Progress -->
+  <mat-card *ngIf="isGenerating" class="progress-card">
+    <mat-card-content>
+      <div class="progress-info">
+        <h3>Generating {{currentReport}} Report</h3>
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

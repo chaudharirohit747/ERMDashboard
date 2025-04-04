@@ -1,0 +1,75 @@
+<div class="leave-form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Request Leave</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="leaveForm" (ngSubmit)="onSubmit()" class="leave-form">
+        <!-- Leave Type -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Leave Type</mat-label>
+          <mat-select formControlName="type" required>
+            <mat-option value="sick">Sick Leave</mat-option>
+            <mat-option value="casual">Casual Leave</mat-option>
+            <mat-option value="vacation">Vacation</mat-option>
+          </mat-select>
+          <mat-error *ngIf="leaveForm.get('type')?.hasError('required')">
+            Leave type is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Date Range -->
+        <div class="date-range">
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startPicker" formControlName="startDate" required>
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+            <mat-error *ngIf="leaveForm.get('startDate')?.hasError('required')">
+              Start date is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" formControlName="endDate" required>
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+            <mat-error *ngIf="leaveForm.get('endDate')?.hasError('required')">
+              End date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Duration Display -->
+        <div class="duration-display" *ngIf="getDuration() > 0">
+          <mat-icon>date_range</mat-icon>
+          <span>Duration: {{ getDuration() }} day(s)</span>
+        </div>
+
+        <!-- Reason -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Reason</mat-label>
+          <textarea matInput formControlName="reason" required rows="4" placeholder="Please provide a detailed reason for your leave request"></textarea>
+          <mat-error *ngIf="leaveForm.get('reason')?.hasError('required')">
+            Reason is required
+          </mat-error>
+          <mat-error *ngIf="leaveForm.get('reason')?.hasError('minlength')">
+            Reason must be at least 10 characters
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Submit and Cancel Buttons -->
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSubmitting">
+            Cancel
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="!leaveForm.valid || isSubmitting" class="submit-button">
+            <mat-icon>send</mat-icon>
+            Submit Request
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,175 @@
+<div class="settings-container">
+  <!-- Profile Settings -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Profile Settings</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <mat-form-field class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required>
+            <mat-error *ngIf="profileForm.get('name')?.errors?.['required']">
+              Name is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" required type="email">
+            <mat-error *ngIf="profileForm.get('email')?.errors?.['required']">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="profileForm.get('email')?.errors?.['email']">
+              Please enter a valid email address
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field class="full-width">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone" type="tel">
+            <mat-error *ngIf="profileForm.get('phone')?.errors?.['pattern']">
+              Please enter a valid phone number
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="!profileForm.valid || isLoading">
+            <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Notification Settings -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Notification Settings</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="notificationForm" (ngSubmit)="onNotificationSettingsChange()">
+        <div class="form-row">
+          <mat-slide-toggle formControlName="emailNotifications">
+            Email Notifications
+          </mat-slide-toggle>
+        </div>
+
+        <div class="form-row">
+          <mat-slide-toggle formControlName="pushNotifications">
+            Push Notifications
+          </mat-slide-toggle>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Notification Frequency</mat-label>
+            <mat-select formControlName="notificationFrequency">
+              <mat-option value="daily">Daily</mat-option>
+              <mat-option value="weekly">Weekly</mat-option>
+              <mat-option value="monthly">Monthly</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit">
+            Save Notification Settings
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Theme Settings -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Theme Settings</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="themeForm" (ngSubmit)="onThemeChange()">
+        <div class="form-row">
+          <mat-slide-toggle formControlName="darkMode">
+            Dark Mode
+          </mat-slide-toggle>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Font Size</mat-label>
+            <mat-select formControlName="fontSize">
+              <mat-option value="small">Small</mat-option>
+              <mat-option value="medium">Medium</mat-option>
+              <mat-option value="large">Large</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Color Scheme</mat-label>
+            <mat-select formControlName="colorScheme">
+              <mat-option value="default">Default</mat-option>
+              <mat-option value="blue">Blue</mat-option>
+              <mat-option value="green">Green</mat-option>
+              <mat-option value="purple">Purple</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit">
+            Save Theme Settings
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Security Settings -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Security Settings</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="securityForm" (ngSubmit)="onSecuritySettingsChange()">
+        <div class="form-row">
+          <mat-slide-toggle formControlName="twoFactorAuth">
+            Two-Factor Authentication
+          </mat-slide-toggle>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Session Timeout (minutes)</mat-label>
+            <mat-select formControlName="sessionTimeout">
+              <mat-option value="15">15 minutes</mat-option>
+              <mat-option value="30">30 minutes</mat-option>
+              <mat-option value="60">1 hour</mat-option>
+              <mat-option value="120">2 hours</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-slide-toggle formControlName="rememberMe">
+            Remember Me
+          </mat-slide-toggle>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit">
+            Save Security Settings
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

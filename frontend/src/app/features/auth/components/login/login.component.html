@@ -1,0 +1,65 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-content">
+      <div class="login-logo">
+        <mat-icon>diamond</mat-icon>
+      </div>
+      <div class="login-header">
+        <h1>Log in to your account</h1>
+        <p>Welcome back! Please enter your details.</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="form-field">
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" placeholder="Enter your email">
+            <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+              Please enter a valid email
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-field">
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="Password">
+            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+              Password is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <mat-checkbox formControlName="rememberMe" color="primary">Remember me</mat-checkbox>
+          <a routerLink="/auth/forgot-password" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button mat-flat-button color="primary" class="login-button" type="submit" [disabled]="loginForm.invalid || isLoading">
+          <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+          <span>Sign in</span>
+        </button>
+
+        <div class="social-login">
+          <p>Or continue with</p>
+          <div class="social-buttons">
+            <button mat-stroked-button type="button" class="google-btn" (click)="loginWithGoogle()">
+              <!-- <img src="assets/images/google.svg" alt="Google" style="width: 20px; height: 20px; margin-right: 8px;">    -->
+              Sign in with Google
+            </button>
+          </div>
+        </div>
+
+        <div class="register-link">
+          Don't have an account? <a routerLink="/auth/register">Sign up</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

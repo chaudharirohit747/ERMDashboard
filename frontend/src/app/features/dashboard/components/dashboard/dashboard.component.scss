@@ -1,0 +1,126 @@
+.dashboard-container {
+  padding: 24px;
+  display: grid;
+  gap: 24px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.stats-card {
+  border-top: 4px solid;
+  border-radius: 8px;
+
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    padding: 24px;
+  }
+
+  .card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    margin-right: 16px;
+
+    mat-icon {
+      color: white;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .card-info {
+    h3 {
+      margin: 0;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    h2 {
+      margin: 4px 0 0;
+      font-size: 24px;
+      font-weight: 500;
+    }
+  }
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 24px;
+}
+
+.chart-card {
+  mat-card-header {
+    padding: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  mat-card-content {
+    padding: 24px;
+    height: 300px;
+  }
+}
+
+.activities-card {
+  mat-card-header {
+    padding: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  mat-card-content {
+    padding: 0;
+  }
+
+  mat-list {
+    padding: 0;
+  }
+
+  mat-list-item {
+    height: auto !important;
+    padding: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    [matListItemTitle] {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    [matListItemLine] {
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 12px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .stats-grid {
+    gap: 16px;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .chart-card mat-card-content {
+    height: 250px;
+  }
+}

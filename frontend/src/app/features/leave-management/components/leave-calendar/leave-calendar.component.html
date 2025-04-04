@@ -1,0 +1,34 @@
+<div class="leave-calendar-container">
+  <h2>Leave Calendar</h2>
+
+  <div class="leave-calendar-content">
+    <mat-calendar (selectedChange)="loadLeaveRequests()"></mat-calendar>
+
+    <div class="leave-list">
+      <h3>Leave Requests</h3>
+      
+      <div class="loading-shade" *ngIf="isLoading">
+        <mat-spinner></mat-spinner>
+      </div>
+
+      <div class="no-data-message" *ngIf="!isLoading && leaveRequests.length === 0">
+        No leave requests found
+      </div>
+
+      <mat-list *ngIf="!isLoading && leaveRequests.length > 0">
+        <mat-list-item *ngFor="let leave of leaveRequests">
+          <mat-icon matListItemIcon [color]="getStatusColor(leave.status)">event</mat-icon>
+          <div matListItemTitle>{{leave.employeeName}}</div>
+          <div matListItemLine>
+            {{leave.type | titlecase}} - {{leave.startDate | date}} to {{leave.endDate | date}}
+          </div>
+          <div matListItemMeta>
+            <mat-chip [color]="getStatusColor(leave.status)" selected>
+              {{leave.status | titlecase}}
+            </mat-chip>
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </div>
+  </div>
+</div>

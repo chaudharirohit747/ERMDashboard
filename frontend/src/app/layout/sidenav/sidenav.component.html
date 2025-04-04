@@ -1,0 +1,19 @@
+<div class="sidenav-container">
+  <div class="logo">
+    <span class="logo-text">ERM Dashboard</span>
+  </div>
+
+  <mat-nav-list>
+    <a mat-list-item *ngFor="let item of filteredMenuItems" [routerLink]="item.route" routerLinkActive="active">
+      <mat-icon matListItemIcon>{{item.icon}}</mat-icon>
+      <span matListItemTitle>{{item.label}}</span>
+    </a>
+  </mat-nav-list>
+
+  <mat-divider></mat-divider>
+
+  <a mat-list-item (click)="logout()">
+    <mat-icon>exit_to_app</mat-icon>
+    <span>Logout</span>
+  </a>
+</div>

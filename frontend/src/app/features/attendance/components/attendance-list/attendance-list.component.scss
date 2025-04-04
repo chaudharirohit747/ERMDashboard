@@ -1,0 +1,314 @@
+.attendance-container {
+  padding: 24px;
+  background-color: #f8f9fc;
+  min-height: 100vh;
+
+  .quick-actions-card {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+    .time-display {
+      text-align: center;
+      margin-bottom: 24px;
+
+      .current-time {
+        font-size: 48px;
+        font-weight: 300;
+        letter-spacing: -1px;
+
+        .period {
+          font-size: 20px;
+          opacity: 0.9;
+          margin-left: 8px;
+        }
+      }
+
+      .date {
+        font-size: 16px;
+        opacity: 0.9;
+        margin: 8px 0;
+      }
+
+      .duration {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 16px;
+        opacity: 0.9;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+
+      .action-button {
+        min-width: 160px;
+        height: 48px;
+        border-radius: 24px;
+        font-size: 16px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-transform: none;
+        transition: transform 0.2s;
+
+        &:not([disabled]):hover {
+          transform: translateY(-2px);
+        }
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+
+        &.check-in {
+          background-color: white;
+          color: #1976d2;
+        }
+
+        &.check-out {
+          background-color: #f44336;
+          color: white;
+        }
+      }
+    }
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+
+    .stats-card {
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s;
+      cursor: pointer;
+
+      &:hover {
+        transform: translateY(-4px);
+      }
+
+      .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+
+        mat-icon {
+          font-size: 24px;
+          color: white;
+        }
+
+        &.personal {
+          background: linear-gradient(135deg, #4caf50, #2e7d32);
+        }
+
+        &.team {
+          background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+
+        &.weekly {
+          background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+        }
+      }
+
+      .stats-content {
+        padding: 20px;
+
+        .stats-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+
+          .stats-title {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+          }
+
+          .stats-percentage {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f44336;
+
+            &.positive {
+              color: #4caf50;
+            }
+          }
+        }
+
+        .stats-value {
+          font-size: 32px;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 16px;
+        }
+
+        mat-progress-bar {
+          height: 6px;
+          border-radius: 3px;
+        }
+      }
+    }
+  }
+
+  .attendance-log {
+    border-radius: 16px;
+    overflow: hidden;
+
+    mat-card-header {
+      padding: 24px;
+      background-color: white;
+      border-bottom: 1px solid #eee;
+
+      mat-card-title {
+        font-size: 20px;
+        font-weight: 500;
+        margin: 0;
+      }
+
+      .header-actions {
+        margin-left: auto;
+      }
+    }
+
+    mat-card-content {
+      padding: 24px;
+
+      .month-nav {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+
+        .month-chip {
+          min-width: auto;
+          padding: 0 16px;
+          height: 36px;
+          border-radius: 18px;
+          font-size: 14px;
+
+          &.active {
+            background-color: #1976d2;
+            color: white;
+          }
+        }
+      }
+
+      .attendance-table {
+        width: 100%;
+
+        .mat-mdc-header-cell {
+          color: #666;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .mat-mdc-row {
+          &:hover {
+            background-color: #f8f9fc;
+          }
+        }
+
+        .date-cell {
+          display: flex;
+          flex-direction: column;
+
+          .day {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+          }
+
+          .month-year {
+            font-size: 12px;
+            color: #666;
+          }
+        }
+
+        .progress-cell {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          .progress-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #1976d2;
+            border-radius: 3px;
+          }
+
+          .hours {
+            min-width: 48px;
+            font-size: 14px;
+            color: #666;
+          }
+        }
+
+        .status-chip {
+          padding: 6px 12px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 500;
+          text-align: center;
+          width: fit-content;
+
+          &.present {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+          }
+
+          &.absent {
+            background-color: #ffebee;
+            color: #c62828;
+          }
+
+          &.late {
+            background-color: #fff3e0;
+            color: #ef6c00;
+          }
+        }
+
+        .action-menu {
+          color: #666;
+        }
+      }
+
+      .loading-shade {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+}
