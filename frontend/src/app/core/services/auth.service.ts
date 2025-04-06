@@ -27,7 +27,7 @@ export class AuthService {
     if (this.users$.value.length === 0) {
       const adminUser: User = {
         id: '1',
-        email: 'admin@example.com',
+        email: 'admin@gmail.com',
         name: 'Admin User',
         role: 'admin'
       };

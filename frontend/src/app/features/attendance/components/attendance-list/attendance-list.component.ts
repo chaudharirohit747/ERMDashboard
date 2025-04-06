@@ -68,12 +68,26 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
     this.isAdmin = currentUser?.role === 'admin';
   }
 
-  displayedColumns = ['date', 'progress', 'status', 'actions'];
+  displayedColumns = ['date', 'employee', 'checkIn', 'checkOut', 'progress', 'status'];
+
+  formatTime(time: string | undefined): string {
+    return time || '-';
+  }
   selectedView = '30days';
+
+  showAllRecords = false;
+
+  toggleView(): void {
+    this.showAllRecords = !this.showAllRecords;
+    this.loadAttendanceRecords();
+  }
 
   private loadAttendanceRecords(): void {
     this.isLoading = true;
-    this.attendanceService.getUserAttendanceRecords(this.authService.getCurrentUser()?.id!).subscribe({
+    this.attendanceService.getUserAttendanceRecords(
+      this.authService.getCurrentUser()?.id!, 
+      this.showAllRecords
+    ).subscribe({
       next: (records) => {
         this.attendanceRecords = records.map(record => ({
           ...record,
