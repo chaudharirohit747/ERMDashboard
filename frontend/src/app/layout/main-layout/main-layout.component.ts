@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
@@ -10,6 +10,7 @@ interface MenuItem {
   label: string;
   route: string;
   icon: string;
+  adminOnly?: boolean;
 }
 
 @Component({
@@ -17,7 +18,7 @@ interface MenuItem {
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']
 })
-export class MainLayoutComponent implements OnInit {
+export class MainLayoutComponent implements OnInit, OnDestroy {
   @ViewChild('drawer') drawer!: MatSidenav;
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
@@ -27,14 +28,17 @@ export class MainLayoutComponent implements OnInit {
     );
 
   currentUser$: Observable<User | null>;
+  private subscription: any;
+  private _userName: string = '';
+  filteredMenuItems: MenuItem[] = [];
   menuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
-    { label: 'Employees', route: '/employees', icon: 'people' },
-    { label: 'Departments', route: '/departments', icon: 'business' },
+    { label: 'Employees', route: '/employees', icon: 'people', adminOnly: true },
+    { label: 'Departments', route: '/departments', icon: 'business', adminOnly: true },
     { label: 'Attendance', route: '/attendance', icon: 'schedule' },
     { label: 'Leave', route: '/leave', icon: 'event_busy' },
     { label: 'Reports', route: '/reports', icon: 'assessment' },
-    { label: 'Settings', route: '/settings', icon: 'settings' }
+    { label: 'Settings', route: '/settings', icon: 'settings', adminOnly: true }
   ];
 
   constructor(
@@ -46,17 +50,28 @@ export class MainLayoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.isLoggedIn()) {
+    if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    this.subscription = this.currentUser$.subscribe(user => {
+      const isAdmin = user?.role === 'admin';
+      this.filteredMenuItems = this.menuItems.filter(item => !item.adminOnly || isAdmin);
+      this._userName = user?.name || '';
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 
-  isLoggedIn(): boolean {
-    return this.authService.isLoggedIn();
-  }
-
-  isAdmin(): boolean {
-    return this.authService.isAdmin();
+  getCurrentPageTitle(): string {
+    const currentRoute = this.router.url;
+    const currentMenuItem = this.menuItems.find(item => currentRoute.startsWith(item.route));
+    return currentMenuItem?.label || 'Dashboard';
   }
 
   logout(): void {
@@ -69,13 +84,6 @@ export class MainLayoutComponent implements OnInit {
   }
 
   get userName(): string {
-    const user = this.authService.getCurrentUser();
-    return user ? user.name : 'Guest';
-  }
-
-  getCurrentPageTitle(): string {
-    const currentRoute = this.router.url;
-    const currentMenuItem = this.menuItems.find(item => currentRoute.startsWith(item.route));
-    return currentMenuItem?.label || 'Dashboard';
+    return this._userName;
   }
 }
