@@ -69,14 +69,14 @@ export class AttendanceService {
     return of(sortedRecords);
   }
 
-  getUserAttendanceRecords(userId: string): Observable<Attendance[]> {
+  getUserAttendanceRecords(userId: string, showAllRecords: boolean = false): Observable<Attendance[]> {
     const currentUser = this.authService.getCurrentUser();
     const isAdmin = currentUser?.role === 'admin';
 
     let records = this.attendanceRecords;
     
-    // If not admin, only show user's own records
-    if (!isAdmin) {
+    // Only show all records if explicitly requested and user is admin
+    if (!showAllRecords || !isAdmin) {
       records = records.filter(record => record.employeeId === userId);
     }
 
