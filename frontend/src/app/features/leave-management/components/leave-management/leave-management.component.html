@@ -10,7 +10,8 @@
   <mat-divider></mat-divider>
 
   <div class="content">
-    <mat-card class="leave-balance">
+    <!-- Leave Balance chart is only visible to employees -->
+    <mat-card class="leave-balance" *ngIf="!isAdmin">
       <mat-card-header>
         <mat-card-title>Leave Balance</mat-card-title>
       </mat-card-header>

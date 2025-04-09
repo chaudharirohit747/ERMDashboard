@@ -216,15 +216,28 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
     });
   }
 
+  // calculateDuration(checkInTime: string | undefined): string {
+  //   if (!checkInTime) return '0';
+    
+  //   const checkIn = new Date(checkInTime);
+  //   const now = new Date();
+  //   const diffHours = (now.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
+  //   return diffHours.toFixed(1);
+  // }
   calculateDuration(checkInTime: string | undefined): string {
     if (!checkInTime) return '0';
-    
+  
     const checkIn = new Date(checkInTime);
+    if (isNaN(checkIn.getTime())) {
+      // console.warn('Invalid check-in time:', checkInTime);
+      return '0';
+    }
+  
     const now = new Date();
     const diffHours = (now.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
     return diffHours.toFixed(1);
   }
-
+  
   getAttendanceBarWidth(record: Attendance): number {
     if (!record.workHours) return 0;
     return Math.min(100, (record.workHours / 9) * 100); // Assuming 9 hour workday

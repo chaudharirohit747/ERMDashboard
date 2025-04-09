@@ -16,9 +16,9 @@ export class LeaveRequestFormComponent implements OnInit {
   isSubmitting = false;
   minDate = new Date();
   leaveTypes = [
+    { value: 'annual', label: 'Annual Leave' },
     { value: 'sick', label: 'Sick Leave' },
-    { value: 'casual', label: 'Casual Leave' },
-    { value: 'vacation', label: 'Vacation' }
+    { value: 'personal', label: 'Personal Leave' }
   ];
 
   constructor(

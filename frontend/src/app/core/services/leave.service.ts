@@ -97,34 +97,14 @@ export class LeaveService {
   }
 
   private initializeMockData(): void {
-    // Mock leave requests
-    if (this.leaveRequestsSubject.value.length === 0) {
-      const mockRequests: LeaveRequest[] = [
-        {
-          id: '1',
-          employeeId: '1',
-          employeeName: 'John Doe',
-          type: 'sick' as const,
-          startDate: new Date('2025-04-05'),
-          endDate: new Date('2025-04-07'),
-          reason: 'Illness',
-          status: 'pending',
-          duration: 3,
-          createdAt: new Date()
-        }
-      ];
-      this.leaveRequestsSubject.next(mockRequests);
-      this.saveToStorage();
-    }
-
-    // Mock leave balances
+    // Initialize leave balances if none exist
     if (this.leaveBalancesSubject.value.length === 0) {
-      const mockBalances = [
-        { leaveType: 'Annual Leave', total: 20, used: 5, remaining: 15 },
-        { leaveType: 'Sick Leave', total: 10, used: 2, remaining: 8 },
-        { leaveType: 'Personal Leave', total: 5, used: 1, remaining: 4 }
+      const defaultBalances = [
+        { leaveType: 'Annual Leave', total: 20, used: 0, remaining: 20 },
+        { leaveType: 'Sick Leave', total: 10, used: 0, remaining: 10 },
+        { leaveType: 'Personal Leave', total: 5, used: 0, remaining: 5 }
       ];
-      this.leaveBalancesSubject.next(mockBalances);
+      this.leaveBalancesSubject.next(defaultBalances);
       this.saveBalancesToStorage();
     }
   }
@@ -236,9 +216,11 @@ export class LeaveService {
     // Update leave balance if approved
     if (status === 'approved') {
       const currentBalances = this.leaveBalancesSubject.value;
-      const balance = currentBalances.find(
-        b => b.leaveType === request.type.charAt(0).toUpperCase() + request.type.slice(1) + ' Leave'
-      );
+      // Map casual leaves to Annual Leave
+      const leaveType = request.type === 'casual' ? 'Annual Leave' : 
+                       request.type.charAt(0).toUpperCase() + request.type.slice(1) + ' Leave';
+      const balance = currentBalances.find(b => b.leaveType === leaveType);
+      
       if (balance) {
         const updatedBalance = {
           ...balance,
