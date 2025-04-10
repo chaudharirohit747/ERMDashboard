@@ -10,12 +10,22 @@ const departmentSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  manager: {
-    type: String
+  head: {
+    type: String,
+    required: true
   },
   employeeCount: {
     type: Number,
     default: 0
+  },
+  budget: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  location: {
+    type: String,
+    required: true
   }
 }, {
   timestamps: true

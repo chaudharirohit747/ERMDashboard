@@ -42,7 +42,7 @@ export class EmployeeFormComponent implements OnInit {
     if (this.form.valid) {
       this.dialogRef.close({
         ...this.form.value,
-        id: this.data?.id
+        _id: this.data?._id
       });
     }
   }

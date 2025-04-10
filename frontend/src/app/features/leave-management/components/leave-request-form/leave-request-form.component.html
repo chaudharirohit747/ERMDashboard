@@ -10,8 +10,8 @@
           <mat-label>Leave Type</mat-label>
           <mat-select formControlName="type" required>
             <mat-option value="sick">Sick Leave</mat-option>
-            <mat-option value="casual">Casual Leave</mat-option>
-            <mat-option value="vacation">Vacation</mat-option>
+            <mat-option value="Annual">Annual Leave</mat-option>
+            <mat-option value="Personal Leave">Personal Leave</mat-option>
           </mat-select>
           <mat-error *ngIf="leaveForm.get('type')?.hasError('required')">
             Leave type is required

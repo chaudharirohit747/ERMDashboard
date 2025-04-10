@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LeaveService, LeaveRequest } from '@app/core/services/leave.service';
+import { LeaveService, Leave } from '@app/core/services/leave.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -9,7 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./leave-calendar.component.scss']
 })
 export class LeaveCalendarComponent implements OnInit {
-  leaveRequests: LeaveRequest[] = [];
+  leaves: Leave[] = [];
   isLoading = false;
   isAdmin = false;
 
@@ -27,9 +27,9 @@ export class LeaveCalendarComponent implements OnInit {
 
   loadLeaveRequests(): void {
     this.isLoading = true;
-    this.leaveService.getLeaveRequests().subscribe({
-      next: (requests: LeaveRequest[]) => {
-        this.leaveRequests = requests;
+    this.leaveService.getLeaves().subscribe({
+      next: (leaves: Leave[]) => {
+        this.leaves = leaves;
         this.isLoading = false;
       },
       error: (error: Error) => {
@@ -40,8 +40,8 @@ export class LeaveCalendarComponent implements OnInit {
     });
   }
 
-  getLeavesByDate(date: Date): LeaveRequest[] {
-    return this.leaveRequests.filter(leave => {
+  getLeavesByDate(date: Date): Leave[] {
+    return this.leaves.filter(leave => {
       const startDate = new Date(leave.startDate);
       const endDate = new Date(leave.endDate);
       const targetDate = new Date(date);

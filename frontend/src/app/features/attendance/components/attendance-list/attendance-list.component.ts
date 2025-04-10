@@ -5,6 +5,7 @@ import { AttendanceService, Attendance } from '@app/core/services/attendance.ser
 import { AuthService } from '@app/core/services/auth.service';
 import { AttendanceFormComponent } from '../attendance-form/attendance-form.component';
 import { interval, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 interface AttendanceStats {
   lastWeekHours: number;
@@ -73,8 +74,8 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
   formatTime(time: string | undefined): string {
     return time || '-';
   }
+  
   selectedView = '30days';
-
   showAllRecords = false;
 
   toggleView(): void {
@@ -84,26 +85,74 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
 
   private loadAttendanceRecords(): void {
     this.isLoading = true;
-    this.attendanceService.getUserAttendanceRecords(
-      this.authService.getCurrentUser()?.id!, 
-      this.showAllRecords
-    ).subscribe({
-      next: (records) => {
-        this.attendanceRecords = records.map(record => ({
-          ...record,
-          date: new Date(record.date)
-        }));
-        console.log('Loaded records:', this.attendanceRecords);
-        this.calculateStats(records);
-        this.findTodayRecord();
-        this.isLoading = false;
-      },
-      error: (error: Error) => {
-        console.error('Error loading attendance records:', error);
-        this.snackBar.open('Error loading attendance records', 'Close', { duration: 3000 });
-        this.isLoading = false;
+    const currentUser = this.authService.getCurrentUser();
+    
+    if (!currentUser?._id) {
+      this.snackBar.open('User not authenticated', 'Close', { duration: 3000 });
+      return;
+    }
+
+    // If admin and showing all records, get all attendance
+    if (this.isAdmin && this.showAllRecords) {
+      this.attendanceService.getAllAttendance().subscribe({
+        next: this.handleAttendanceRecords.bind(this),
+        error: this.handleError.bind(this)
+      });
+    } else {
+      // Filter records for the current user on the frontend
+      this.attendanceService.getAllAttendance().pipe(
+        map(records => records.filter(record => record.employeeId === currentUser._id))
+      ).subscribe({
+        next: this.handleAttendanceRecords.bind(this),
+        error: this.handleError.bind(this)
+      });
+    }
+  }
+
+  private handleAttendanceRecords(records: Attendance[]): void {
+    this.attendanceRecords = records.map(record => ({
+      ...record,
+      date: new Date(record.date)
+    }));
+    console.log('Loaded records:', this.attendanceRecords);
+    this.calculateStats(records);
+    this.findTodayRecord();
+    this.isLoading = false;
+  }
+
+  private handleError(error: Error): void {
+    console.error('Error loading attendance records:', error);
+    this.snackBar.open('Error loading attendance records', 'Close', { duration: 3000 });
+    this.isLoading = false;
+  }
+
+  private calculateStats(records: Attendance[]): void {
+    // Implementation of stats calculation
+    // This can be enhanced based on your specific requirements
+    const now = new Date();
+    const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const lastWeekRecords = records.filter(r => new Date(r.date) >= lastWeek);
+    const myRecords = records.filter(r => r.employeeId === this.authService.getCurrentUser()?._id);
+    const teamRecords = this.isAdmin ? records : [];
+
+    this.stats = {
+      lastWeekHours: this.calculateTotalHours(lastWeekRecords),
+      lastWeekPercentage: Number(((lastWeekRecords.length / 7) * 100).toFixed(2)),
+      myHours: this.calculateTotalHours(myRecords),
+      myPercentage: Number(((myRecords.length / 30) * 100).toFixed(2)),
+      teamHours: this.calculateTotalHours(teamRecords),
+      teamPercentage: this.isAdmin ? Number(((teamRecords.length / (30 * 5)) * 100).toFixed(2)) : 0
+    };
+  }
+
+  private calculateTotalHours(records: Attendance[]): number {
+    return records.reduce((total, record) => {
+      if (record.workHours) {
+        return total + record.workHours;
       }
-    });
+      return total;
+    }, 0);
   }
 
   private findTodayRecord(): void {
@@ -113,100 +162,52 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
     this.todayRecord = this.attendanceRecords.find(record => {
       const recordDate = new Date(record.date);
       recordDate.setHours(0, 0, 0, 0);
-      return recordDate.getTime() === today.getTime();
+      return recordDate.getTime() === today.getTime() && 
+             record.employeeId === this.authService.getCurrentUser()?._id;
     }) || null;
-
-    // If today's record exists and has checkout, set todayRecord to null
-    if (this.todayRecord?.checkOut) {
-      this.todayRecord = null;
-    }
-  }
-
-  private calculateStats(records: Attendance[]): void {
-    const today = new Date();
-    const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-    
-    // Calculate last week's stats
-    const lastWeekRecords = records.filter(r => {
-      const recordDate = new Date(r.date);
-      return recordDate >= lastWeek && recordDate < today;
-    });
-
-    const lastWeekHours = lastWeekRecords.reduce((total, record) => {
-      return total + (record.workHours || 0);
-    }, 0);
-
-    // Calculate current stats
-    const myHours = records.reduce((total, record) => {
-      return total + (record.workHours || 0);
-    }, 0);
-
-    // Mock team stats for now
-    const teamHours = myHours * 1.2; // Just an example
-
-    this.stats = {
-      lastWeekHours: Number(lastWeekHours.toFixed(1)),
-      lastWeekPercentage: Math.min(100, (lastWeekHours / 40) * 100), // Assuming 40 hour week
-      myHours: Number(myHours.toFixed(1)),
-      myPercentage: Math.min(100, (myHours / 160) * 100), // Assuming 160 hour month
-      teamHours: Number(teamHours.toFixed(1)),
-      teamPercentage: Math.min(100, (teamHours / 160) * 100)
-    };
   }
 
   checkIn(): void {
-    this.isLoading = true;
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser?._id) {
+      this.snackBar.open('Please log in first', 'Close', { duration: 3000 });
+      return;
+    }
+
     this.attendanceService.checkIn().subscribe({
       next: (record) => {
         this.snackBar.open('Successfully checked in', 'Close', { duration: 3000 });
-        this.todayRecord = {
-          ...record,
-          date: new Date(record.date)
-        };
         this.loadAttendanceRecords();
       },
-      error: (error: Error) => {
-        console.error('Error checking in:', error);
+      error: (error) => {
+        console.error('Check-in error:', error);
         this.snackBar.open(error.message || 'Error checking in', 'Close', { duration: 3000 });
-        this.isLoading = false;
       }
     });
   }
 
-  checkOut(id: string): void {
-    if (!id) {
-      this.snackBar.open('Invalid attendance record', 'Close', { duration: 3000 });
+  checkOut(): void {
+    if (!this.todayRecord?._id) {
+      this.snackBar.open('No active check-in found', 'Close', { duration: 3000 });
       return;
     }
 
-    this.isLoading = true;
-    this.attendanceService.checkOut(id).subscribe({
+    this.attendanceService.checkOut(this.todayRecord._id).subscribe({
       next: () => {
         this.snackBar.open('Successfully checked out', 'Close', { duration: 3000 });
         this.loadAttendanceRecords();
       },
-      error: (error: Error) => {
-        console.error('Error checking out:', error);
-        this.snackBar.open('Error checking out', 'Close', { duration: 3000 });
-        this.isLoading = false;
+      error: (error) => {
+        console.error('Check-out error:', error);
+        this.snackBar.open(error.message || 'Error checking out', 'Close', { duration: 3000 });
       }
     });
   }
 
-  onViewChange(view: string): void {
-    this.selectedView = view;
-    // Implement view change logic here
-  }
-
   openAttendanceForm(): void {
-    if (!this.isAdmin) {
-      this.snackBar.open('Only administrators can add manual entries', 'Close', { duration: 3000 });
-      return;
-    }
-
     const dialogRef = this.dialog.open(AttendanceFormComponent, {
       width: '500px',
-      data: { isAdmin: this.isAdmin }
+      data: { mode: 'create' }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -216,20 +217,11 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
     });
   }
 
-  // calculateDuration(checkInTime: string | undefined): string {
-  //   if (!checkInTime) return '0';
-    
-  //   const checkIn = new Date(checkInTime);
-  //   const now = new Date();
-  //   const diffHours = (now.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
-  //   return diffHours.toFixed(1);
-  // }
   calculateDuration(checkInTime: string | undefined): string {
     if (!checkInTime) return '0';
   
     const checkIn = new Date(checkInTime);
     if (isNaN(checkIn.getTime())) {
-      // console.warn('Invalid check-in time:', checkInTime);
       return '0';
     }
   
@@ -240,6 +232,12 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
   
   getAttendanceBarWidth(record: Attendance): number {
     if (!record.workHours) return 0;
-    return Math.min(100, (record.workHours / 9) * 100); // Assuming 9 hour workday
+    // Assuming 9 hour workday
+    return Math.min(100, (record.workHours / 9) * 100);
+  }
+
+  onViewChange(view: string): void {
+    this.selectedView = view;
+    this.loadAttendanceRecords();
   }
 }

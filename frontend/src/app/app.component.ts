@@ -52,7 +52,8 @@ export class AppComponent implements OnInit, OnDestroy {
             // Navigate to appropriate dashboard only if we're on the root path
             if (currentUrl === '/') {
               if (user.role === 'admin') {
-                this.router.navigate(['/employees']);
+                // this.router.navigate(['/employees']);
+                this.router.navigate(['/dashboard']);
               } else {
                 this.router.navigate(['/dashboard']);
               }

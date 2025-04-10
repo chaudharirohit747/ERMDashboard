@@ -11,12 +11,12 @@
         <mat-spinner></mat-spinner>
       </div>
 
-      <div class="no-data-message" *ngIf="!isLoading && leaveRequests.length === 0">
-        No leave requests found
+      <div class="no-data-message" *ngIf="!isLoading && leaves.length === 0">
+        No leaves found
       </div>
 
-      <mat-list *ngIf="!isLoading && leaveRequests.length > 0">
-        <mat-list-item *ngFor="let leave of leaveRequests">
+      <mat-list *ngIf="!isLoading && leaves.length > 0">
+        <mat-list-item *ngFor="let leave of leaves">
           <mat-icon matListItemIcon [color]="getStatusColor(leave.status)">event</mat-icon>
           <div matListItemTitle>{{leave.employeeName}}</div>
           <div matListItemLine>

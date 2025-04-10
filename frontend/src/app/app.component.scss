@@ -80,6 +80,22 @@ mat-toolbar {
 
   .toolbar-right {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .user-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      color: white;
+
+      small {
+        opacity: 0.8;
+        font-size: 12px;
+      }
+    }
 
     .user-button {
       display: flex;

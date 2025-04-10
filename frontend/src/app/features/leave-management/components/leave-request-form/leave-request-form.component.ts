@@ -16,9 +16,9 @@ export class LeaveRequestFormComponent implements OnInit {
   isSubmitting = false;
   minDate = new Date();
   leaveTypes = [
-    { value: 'annual', label: 'Annual Leave' },
+    { value: 'Annual', label: 'Annual Leave' },
     { value: 'sick', label: 'Sick Leave' },
-    { value: 'personal', label: 'Personal Leave' }
+    { value: 'Personal Leave', label: 'Personal Leave' }
   ];
 
   constructor(
@@ -72,16 +72,17 @@ export class LeaveRequestFormComponent implements OnInit {
       const formValue = this.leaveForm.value;
 
       const leaveRequest = {
-        employeeId: currentUser.id,
-        employeeName: currentUser.name,
+        employeeId: currentUser._id,
+        employeeName: currentUser.name || 'Unknown',
         type: formValue.type,
         startDate: new Date(formValue.startDate),
         endDate: new Date(formValue.endDate),
         duration: this.getDuration(),
-        reason: formValue.reason
+        reason: formValue.reason,
+        status: 'pending' as const
       };
 
-      this.leaveService.createLeaveRequest(leaveRequest).subscribe({
+      this.leaveService.createLeave(leaveRequest).subscribe({
         next: (createdRequest) => {
           this.snackBar.open('Leave request submitted successfully', 'Close', { duration: 3000 });
           // Close dialog with the created request to update the list immediately

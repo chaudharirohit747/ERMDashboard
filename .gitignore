@@ -9,6 +9,8 @@ tmp/
 out-tsc/
 bazel-out/
 .angular/cache
+*.js.map
+*.d.ts
 
 # Logs
 npm-debug.log*
@@ -38,9 +40,50 @@ coverage
 libpeerconnection.log
 testem.log
 typings
+.env
+.env.local
+.env.development
+.env.test
+.env.production
 
 # System Files
 .DS_Store
 Thumbs.db
-frontend/.angular/cache/16.2.16/angular-webpack
-frontend/.angular/cache/16.2.16/babel-webpack
+desktop.ini
+
+# Angular specific
+frontend/.angular/
+frontend/dist/
+frontend/.sass-cache/
+frontend/src/**/*.js
+frontend/src/**/*.js.map
+frontend/e2e/**/*.js
+frontend/e2e/**/*.js.map
+
+# Node.js specific
+backend/node_modules/
+backend/coverage/
+backend/test-results/
+backend/dist/
+backend/.env
+backend/uploads/
+backend/logs/
+
+# Testing
+coverage/
+.nyc_output/
+*.spec.js
+*.spec.ts
+*.test.js
+*.test.ts
+
+# Build artifacts
+*.tsbuildinfo
+.tscache/
+.awcache/
+
+# Editor directories and files
+*.swp
+*.swo
+*~
+.history/

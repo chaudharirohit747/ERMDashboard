@@ -42,13 +42,18 @@ export class DepartmentListComponent implements OnInit {
   openDepartmentForm(department?: Department): void {
     const dialogRef = this.dialog.open(DepartmentFormComponent, {
       width: '500px',
-      data: department
+      data: department ? { ...department } : undefined
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        if (department?.id) {
-          this.updateDepartment(department.id, result);
+        if (department?._id) {
+          // For update, don't send the id in the payload
+          const { _id, ...updateData } = result;
+          // Only update if there are changes
+          if (JSON.stringify(updateData) !== JSON.stringify(department)) {
+            this.updateDepartment(department._id, updateData);
+          }
         } else {
           this.addDepartment(result);
         }
@@ -57,41 +62,58 @@ export class DepartmentListComponent implements OnInit {
   }
 
   addDepartment(department: Department): void {
-    this.departmentService.addDepartment(department).subscribe({
+    // Remove any undefined or null values
+    const cleanDepartment = Object.fromEntries(
+      Object.entries(department).filter(([_, v]) => v != null)
+    ) as Department;
+
+    this.departmentService.addDepartment(cleanDepartment).subscribe({
       next: () => {
         this.loadDepartments();
         this.snackBar.open('Department added successfully', 'Close', { duration: 3000 });
       },
       error: (error) => {
         console.error('Error adding department:', error);
-        this.snackBar.open('Error adding department', 'Close', { duration: 3000 });
+        const errorMessage = error.error?.message || 'Error adding department';
+        this.snackBar.open(errorMessage, 'Close', { duration: 3000 });
       }
     });
   }
 
-  updateDepartment(id: number, department: Department): void {
-    this.departmentService.updateDepartment(id, department).subscribe({
+  updateDepartment(id: string, department: Partial<Department>): void {
+    // Remove any undefined or null values
+    const cleanDepartment = Object.fromEntries(
+      Object.entries(department).filter(([_, v]) => v != null)
+    ) as Partial<Department>;
+
+    this.departmentService.updateDepartment(id, cleanDepartment).subscribe({
       next: () => {
         this.loadDepartments();
         this.snackBar.open('Department updated successfully', 'Close', { duration: 3000 });
       },
       error: (error) => {
         console.error('Error updating department:', error);
-        this.snackBar.open('Error updating department', 'Close', { duration: 3000 });
+        const errorMessage = error.error?.message || 'Error updating department';
+        this.snackBar.open(errorMessage, 'Close', { duration: 3000 });
       }
     });
   }
 
-  deleteDepartment(id: number): void {
+  deleteDepartment(department: Department): void {
+    if (!department._id) {
+      this.snackBar.open('Cannot delete department: Invalid ID', 'Close', { duration: 3000 });
+      return;
+    }
+
     if (confirm('Are you sure you want to delete this department?')) {
-      this.departmentService.deleteDepartment(id).subscribe({
+      this.departmentService.deleteDepartment(department._id).subscribe({
         next: () => {
           this.loadDepartments();
           this.snackBar.open('Department deleted successfully', 'Close', { duration: 3000 });
         },
         error: (error) => {
           console.error('Error deleting department:', error);
-          this.snackBar.open('Error deleting department', 'Close', { duration: 3000 });
+          this.snackBar.open(error.error?.message || 'Error deleting department', 'Close', { duration: 3000 });
         }
       });
     }

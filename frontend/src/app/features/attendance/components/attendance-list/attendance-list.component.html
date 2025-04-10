@@ -18,7 +18,7 @@
         <mat-icon>login</mat-icon>
         <span>Check In</span>
       </button>
-      <button mat-flat-button color="warn" (click)="checkOut(todayRecord?.id!)" 
+      <button mat-flat-button color="warn" (click)="checkOut()" 
               [disabled]="!todayRecord?.checkIn" class="action-button check-out">
         <mat-icon>logout</mat-icon>
         <span>Check Out</span>

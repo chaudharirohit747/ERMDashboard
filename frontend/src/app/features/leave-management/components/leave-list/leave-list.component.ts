@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { LeaveService, LeaveRequest } from '@app/core/services/leave.service';
+import { LeaveService, Leave } from '@app/core/services/leave.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { LeaveRequestFormComponent } from '../leave-request-form/leave-request-form.component';
 
@@ -11,7 +11,7 @@ import { LeaveRequestFormComponent } from '../leave-request-form/leave-request-f
   styleUrls: ['./leave-list.component.scss']
 })
 export class LeaveListComponent implements OnInit {
-  leaveRequests: LeaveRequest[] = [];
+  leaves: Leave[] = [];
   displayedColumns: string[] = ['employeeName', 'type', 'startDate', 'endDate', 'duration', 'reason', 'status', 'actions'];
   isLoading = false;
   isAdmin = false;
@@ -34,9 +34,9 @@ export class LeaveListComponent implements OnInit {
 
   loadLeaveRequests(): void {
     this.isLoading = true;
-    this.leaveService.getLeaveRequests().subscribe({
-      next: (requests: LeaveRequest[]) => {
-        this.leaveRequests = requests;
+    this.leaveService.getLeaves().subscribe({
+      next: (leaves: Leave[]) => {
+        this.leaves = leaves;
         this.isLoading = false;
       },
       error: (error: Error) => {
@@ -57,7 +57,7 @@ export class LeaveListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         // Add the new leave request to the list immediately
-        this.leaveRequests = [...this.leaveRequests, result];
+        this.leaves = [...this.leaves, result];
       }
     });
   }
@@ -69,7 +69,7 @@ export class LeaveListComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.leaveService.updateLeaveRequestStatus(leaveId, status).subscribe({
+    this.leaveService.updateLeave(leaveId, { status }).subscribe({
       next: () => {
         this.snackBar.open(`Leave request ${status}`, 'Close', { duration: 3000 });
         this.loadLeaveRequests();

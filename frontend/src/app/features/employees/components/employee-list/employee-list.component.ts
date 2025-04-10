@@ -58,29 +58,7 @@ export class EmployeeListComponent implements OnInit {
     }
   }
 
-  onAddEmployee(): void {
-    const dialogRef = this.dialog.open(EmployeeFormComponent, {
-      width: '600px',
-      data: null
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.employeeService.addEmployee(result).subscribe(
-          () => {
-            this.loadEmployees();
-            this.snackBar.open('Employee added successfully', 'Close', { duration: 3000 });
-          },
-          error => {
-            console.error('Error adding employee:', error);
-            this.snackBar.open('Error adding employee', 'Close', { duration: 3000 });
-          }
-        );
-      }
-    });
-  }
-
-  onEditEmployee(employee: Employee): void {
+  openEmployeeForm(employee?: Employee): void {
     const dialogRef = this.dialog.open(EmployeeFormComponent, {
       width: '600px',
       data: employee
@@ -88,32 +66,50 @@ export class EmployeeListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.employeeService.updateEmployee(employee.id, result).subscribe(
-          () => {
-            this.loadEmployees();
-            this.snackBar.open('Employee updated successfully', 'Close', { duration: 3000 });
-          },
-          error => {
-            console.error('Error updating employee:', error);
-            this.snackBar.open('Error updating employee', 'Close', { duration: 3000 });
-          }
-        );
+        if (result._id) {
+          this.employeeService.updateEmployee(result._id, result).subscribe({
+            next: () => {
+              this.loadEmployees();
+              this.snackBar.open('Employee updated successfully', 'Close', { duration: 3000 });
+            },
+            error: (error) => {
+              console.error('Error updating employee:', error);
+              this.snackBar.open(error.message || 'Error updating employee', 'Close', { duration: 3000 });
+            }
+          });
+        } else {
+          this.employeeService.addEmployee(result).subscribe({
+            next: () => {
+              this.loadEmployees();
+              this.snackBar.open('Employee added successfully', 'Close', { duration: 3000 });
+            },
+            error: (error) => {
+              console.error('Error adding employee:', error);
+              this.snackBar.open(error.message || 'Error adding employee', 'Close', { duration: 3000 });
+            }
+          });
+        }
       }
     });
   }
 
-  onDeleteEmployee(employee: Employee): void {
+  deleteEmployee(employee: Employee): void {
+    if (!employee._id) {
+      this.snackBar.open('Cannot delete employee: Missing ID', 'Close', { duration: 3000 });
+      return;
+    }
+
     if (confirm('Are you sure you want to delete this employee?')) {
-      this.employeeService.deleteEmployee(employee.id).subscribe(
-        () => {
+      this.employeeService.deleteEmployee(employee._id).subscribe({
+        next: () => {
           this.loadEmployees();
           this.snackBar.open('Employee deleted successfully', 'Close', { duration: 3000 });
         },
-        error => {
+        error: (error) => {
           console.error('Error deleting employee:', error);
-          this.snackBar.open('Error deleting employee', 'Close', { duration: 3000 });
+          this.snackBar.open(error.message || 'Error deleting employee', 'Close', { duration: 3000 });
         }
-      );
+      });
     }
   }
 }

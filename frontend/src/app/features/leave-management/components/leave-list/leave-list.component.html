@@ -2,7 +2,7 @@
   <h2>Leave Requests</h2>
 
   <div class="leave-list-content">
-    <table mat-table [dataSource]="leaveRequests" class="leave-table">
+    <table mat-table [dataSource]="leaves" class="leave-table">
       <!-- Employee Name Column -->
       <ng-container matColumnDef="employeeName">
         <th mat-header-cell *matHeaderCellDef>Employee</th>
@@ -57,11 +57,11 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="updateStatus(leave.id, 'approved')">
+            <button mat-menu-item (click)="updateStatus(leave._id!, 'approved')">
               <mat-icon>check</mat-icon>
               <span>Approve</span>
             </button>
-            <button mat-menu-item (click)="updateStatus(leave.id, 'rejected')">
+            <button mat-menu-item (click)="updateStatus(leave._id!, 'rejected')">
               <mat-icon>close</mat-icon>
               <span>Reject</span>
             </button>
@@ -79,8 +79,8 @@
     </div>
 
     <!-- No Data Message -->
-    <div class="no-data-message" *ngIf="!isLoading && leaveRequests.length === 0">
-      No leave requests found
+    <div class="no-data-message" *ngIf="!isLoading && leaves.length === 0">
+      No leaves found
     </div>
   </div>
 </div>

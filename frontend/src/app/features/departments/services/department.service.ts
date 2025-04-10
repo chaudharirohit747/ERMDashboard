@@ -1,108 +1,95 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { map, tap, delay } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
+import { environment } from '@env/environment';
 
 export interface Department {
-  id: number;
+  _id?: string;
   name: string;
   description: string;
+  head: string;
   employeeCount: number;
   budget: number;
+  location: string;
 }
 
-const STORAGE_KEY = 'departments';
+const API_URL = `${environment.apiUrl}/departments`;
 
 @Injectable({
   providedIn: 'root'
 })
 export class DepartmentService {
-  private departments$ = new BehaviorSubject<Department[]>(this.loadDepartments());
+  private departments$ = new BehaviorSubject<Department[]>([]);
 
-  constructor() {
-    // Initialize with sample data if empty
-    if (this.departments$.value.length === 0) {
-      this.departments$.next([
-        {
-          id: 1,
-          name: 'Engineering',
-          description: 'Software development and engineering',
-          employeeCount: 50,
-          budget: 1000000
-        },
-        {
-          id: 2,
-          name: 'Marketing',
-          description: 'Marketing and advertising',
-          employeeCount: 20,
-          budget: 500000
-        }
-      ]);
-      this.saveDepartments();
+  constructor(private http: HttpClient) {
+    this.loadDepartments();
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'An error occurred';
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = error.error.message;
+    } else {
+      // Server-side error
+      errorMessage = error.error?.message || `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
+    return throwError(() => new Error(errorMessage));
   }
 
   getDepartments(): Observable<Department[]> {
-    return this.departments$.asObservable();
+    return this.http.get<Department[]>(API_URL).pipe(
+      tap(departments => this.departments$.next(departments)),
+      catchError(this.handleError)
+    );
   }
 
-  getDepartmentById(id: number): Observable<Department | undefined> {
-    return this.departments$.pipe(
-      map(departments => departments.find(dept => dept.id === id))
+  getDepartmentById(id: string): Observable<Department> {
+    return this.http.get<Department>(`${API_URL}/${id}`).pipe(
+      catchError(this.handleError)
     );
   }
 
   addDepartment(department: Omit<Department, 'id'>): Observable<Department> {
-    return of(department).pipe(
-      delay(500), // Simulate API delay
-      map(dept => ({
-        ...dept,
-        id: this.getNextId()
-      })),
+    return this.http.post<Department>(API_URL, department).pipe(
       tap(newDept => {
         const currentDepts = this.departments$.value;
         this.departments$.next([...currentDepts, newDept]);
-        this.saveDepartments();
-      })
+      }),
+      catchError(this.handleError)
     );
   }
 
-  updateDepartment(id: number, department: Partial<Department>): Observable<Department> {
-    return of(department).pipe(
-      delay(500), // Simulate API delay
-      map(updates => {
+  updateDepartment(_id: string, department: Partial<Department>): Observable<Department> {
+    // Don't send the id in the payload
+    const { _id: _, ...updateData } = department;
+    return this.http.put<Department>(`${API_URL}/${_id}`, updateData).pipe(
+      tap(updatedDept => {
         const currentDepts = this.departments$.value;
         const updatedDepts = currentDepts.map(dept => 
-          dept.id === id ? { ...dept, ...updates } : dept
+          dept._id === _id ? { ...dept, ...updatedDept } : dept
         );
         this.departments$.next(updatedDepts);
-        this.saveDepartments();
-        return updatedDepts.find(dept => dept.id === id)!;
-      })
+      }),
+      catchError(this.handleError)
     );
   }
 
-  deleteDepartment(id: number): Observable<void> {
-    return of(void 0).pipe(
-      delay(500), // Simulate API delay
+  deleteDepartment(_id: string): Observable<void> {
+    return this.http.delete<void>(`${API_URL}/${_id}`).pipe(
       tap(() => {
         const currentDepts = this.departments$.value;
-        this.departments$.next(currentDepts.filter(dept => dept.id !== id));
-        this.saveDepartments();
-      })
+        this.departments$.next(currentDepts.filter(dept => dept._id !== _id));
+      }),
+      catchError(this.handleError)
     );
   }
 
-  private getNextId(): number {
-    const departments = this.departments$.value;
-    return departments.length ? Math.max(...departments.map(d => d.id)) + 1 : 1;
-  }
-
-  private loadDepartments(): Department[] {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  }
-
-  private saveDepartments(): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.departments$.value));
+  private loadDepartments(): void {
+    this.getDepartments().subscribe({
+      next: departments => this.departments$.next(departments),
+      error: error => console.error('Error loading departments:', error)
+    });
   }
 }

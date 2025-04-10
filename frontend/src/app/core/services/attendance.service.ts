@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 
 export interface Attendance {
-  id: string;
+  _id?: string;
   employeeId: string;
   employeeName: string;
   date: Date;
@@ -18,166 +21,102 @@ export interface Attendance {
   providedIn: 'root'
 })
 export class AttendanceService {
-  private parseTime(timeStr: string): Date | null {
-    try {
-      const today = new Date();
-      const [time, period] = timeStr.split(' ');
-      let [hours, minutes, seconds] = time.split(':').map(Number);
-      
-      // Convert to 24-hour format if PM
-      if (period === 'PM' && hours !== 12) hours += 12;
-      if (period === 'AM' && hours === 12) hours = 0;
-      
-      return new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes, seconds);
-    } catch (error) {
-      console.error('Error parsing time:', error);
-      return null;
+  private apiUrl = `${environment.apiUrl}/attendance`;
+
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
+
+  getAllAttendance(): Observable<Attendance[]> {
+    return this.http.get<Attendance[]>(this.apiUrl);
+  }
+
+  getAttendanceById(id: string): Observable<Attendance> {
+    if (!id) {
+      return throwError(() => new Error('ID is required'));
     }
-  }
-  private readonly STORAGE_KEY = 'attendance_records';
-  private attendanceRecords: Attendance[] = [];
-  private employees = [
-    // Assuming you have a list of employees, replace this with your actual data
-    { id: '1', name: 'John Doe' },
-    { id: '2', name: 'Jane Doe' },
-  ];
-
-  constructor(private authService: AuthService) {
-    this.loadFromStorage();
-  }
-
-  private loadFromStorage(): void {
-    const storedData = localStorage.getItem(this.STORAGE_KEY);
-    if (storedData) {
-      this.attendanceRecords = JSON.parse(storedData).map((record: any) => ({
-        ...record,
-        date: new Date(record.date)
-      }));
-    }
-  }
-
-  private saveToStorage(): void {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.attendanceRecords));
-  }
-
-  getAllAttendanceRecords(): Observable<Attendance[]> {
-    // Sort records by date in descending order and limit to last 15 days
-    const sortedRecords = [...this.attendanceRecords]
-      .map(record => ({ ...record, date: new Date(record.date) }))
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .filter((_, index) => index < 15);
-    return of(sortedRecords);
-  }
-
-  getUserAttendanceRecords(userId: string, showAllRecords: boolean = false): Observable<Attendance[]> {
-    const currentUser = this.authService.getCurrentUser();
-    const isAdmin = currentUser?.role === 'admin';
-
-    let records = this.attendanceRecords;
-    
-    // Only show all records if explicitly requested and user is admin
-    if (!showAllRecords || !isAdmin) {
-      records = records.filter(record => record.employeeId === userId);
-    }
-
-    // Sort by date (newest first) and convert dates
-    records = records
-      .map(record => ({
-        ...record,
-        date: new Date(record.date)
-      }))
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
-
-    return of(records);
+    return this.http.get<Attendance>(`${this.apiUrl}/${id}`);
   }
 
   createAttendance(attendance: Attendance): Observable<Attendance> {
-    // Ensure we have a proper date object
-    attendance.date = new Date(attendance.date);
-    
-    // Add the record
-    this.attendanceRecords.push(attendance);
-    this.saveToStorage();
-    return of(attendance);
+    if (!attendance) {
+      return throwError(() => new Error('Attendance data is required'));
+    }
+    return this.http.post<Attendance>(this.apiUrl, attendance);
+  }
+
+  updateAttendance(id: string, attendance: Attendance): Observable<Attendance> {
+    if (!id || !attendance) {
+      return throwError(() => new Error('ID and attendance data are required'));
+    }
+    return this.http.put<Attendance>(`${this.apiUrl}/${id}`, attendance);
+  }
+
+  deleteAttendance(id: string): Observable<void> {
+    if (!id) {
+      return throwError(() => new Error('ID is required'));
+    }
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   checkIn(): Observable<Attendance> {
     const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      return throwError(() => new Error('User not found'));
+    if (!currentUser?._id) {
+      return throwError(() => new Error('User not authenticated'));
     }
-
-    // Check if user already has a check-in for today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
     
-    const existingRecord = this.attendanceRecords.find(record => {
-      const recordDate = new Date(record.date);
-      recordDate.setHours(0, 0, 0, 0);
-      return record.employeeId === currentUser.id && recordDate.getTime() === today.getTime();
-    });
-
-    if (existingRecord?.checkIn) {
-      return throwError(() => new Error('Already checked in for today'));
-    }
-
-    const currentTime = new Date();
-    const isLate = currentTime.getHours() >= 9 && currentTime.getMinutes() > 15;
-
-    const newAttendance: Attendance = {
-      id: Date.now().toString(),
-      employeeId: currentUser.id,
-      employeeName: currentUser.name,
-      date: today,
-      checkIn: currentTime.toLocaleTimeString(),
+    const attendance: Attendance = {
+      employeeId: currentUser._id,
+      employeeName: currentUser.name || 'Unknown',
+      date: new Date(),
+      checkIn: new Date().toLocaleTimeString(),
       checkOut: '',
-      status: isLate ? 'late' : 'present'
+      status: 'present'
     };
-
-    this.attendanceRecords.push(newAttendance);
-    this.saveToStorage();
-    return of(newAttendance);
+    
+    return this.createAttendance(attendance);
   }
 
-  checkOut(id: string): Observable<void> {
-    const record = this.attendanceRecords.find(r => r.id === id);
-    if (!record) {
-      return throwError(() => new Error('Record not found'));
+  checkOut(id: string): Observable<Attendance> {
+    if (!id) {
+      return throwError(() => new Error('ID is required'));
     }
 
-    if (record.checkOut) {
-      return throwError(() => new Error('Already checked out'));
-    }
+    return this.getAttendanceById(id).pipe(
+      switchMap((attendance: Attendance) => {
+        const updatedAttendance = {
+          ...attendance,
+          checkOut: new Date().toLocaleTimeString(),
+          workHours: this.calculateWorkHours(attendance.checkIn)
+        };
+        return this.updateAttendance(id, updatedAttendance);
+      })
+    );
+  }
 
+  private calculateWorkHours(checkInTime: string): number {
+    const checkIn = this.parseTime(checkInTime);
     const now = new Date();
-    record.checkOut = now.toLocaleTimeString();
+    if (!checkIn) return 0;
     
-    // Calculate working hours
-    const checkInTime = this.parseTime(record.checkIn);
-    const checkOutTime = this.parseTime(record.checkOut);
-    
-    if (checkInTime && checkOutTime) {
-      const diffMs = checkOutTime.getTime() - checkInTime.getTime();
-      record.workHours = Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100; // Round to 2 decimals
-    }
-
-    this.saveToStorage();
-    return of(void 0);
+    const diffHours = (now.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
+    return Math.round(diffHours * 100) / 100; // Round to 2 decimal places
   }
 
-  updateAttendance(id: string, updates: Partial<Attendance>): Observable<Attendance> {
-    const index = this.attendanceRecords.findIndex(record => record.id === id);
-    if (index === -1) {
-      throw new Error('Attendance record not found');
-    }
-
-    const updatedRecord = {
-      ...this.attendanceRecords[index],
-      ...updates
-    };
-
-    this.attendanceRecords[index] = updatedRecord;
-    this.saveToStorage();
-    return of(updatedRecord);
+  private parseTime(timeStr: string): Date | null {
+    if (!timeStr) return null;
+    const [time, period] = timeStr.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+    
+    const date = new Date();
+    let hrs = hours;
+    
+    // Convert to 24-hour format
+    if (period === 'PM' && hours !== 12) hrs += 12;
+    if (period === 'AM' && hours === 12) hrs = 0;
+    
+    date.setHours(hrs, minutes);
+    return date;
   }
 }
