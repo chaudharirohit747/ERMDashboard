@@ -14,7 +14,7 @@ import { EmployeeFormComponent } from '../employee-form/employee-form.component'
   styleUrls: ['./employee-list.component.scss']
 })
 export class EmployeeListComponent implements OnInit {
-  displayedColumns: string[] = ['name', 'email', 'department', 'position', 'salary', 'actions'];
+  displayedColumns: string[] = ['name', 'email', 'department', 'position', 'actions'];  //, 'salary'
   dataSource!: MatTableDataSource<Employee>;
   isLoading = false;
 

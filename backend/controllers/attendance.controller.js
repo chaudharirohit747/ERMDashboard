@@ -69,19 +69,51 @@ exports.updateAttendance = async (req, res) => {
     }
 
     // Only update allowed fields
-    const allowedUpdates = ['checkOut', 'status', 'notes', 'workHours'];
+    const allowedUpdates = ['checkOut', 'status', 'notes'];
     Object.keys(req.body).forEach(key => {
       if (allowedUpdates.includes(key)) {
         attendance[key] = req.body[key];
       }
     });
 
+    // Calculate work hours if checking out
+    if (req.body.checkOut && attendance.checkIn) {
+      const checkIn = parseTime(attendance.checkIn);
+      const checkOut = parseTime(req.body.checkOut);
+      
+      if (checkIn && checkOut) {
+        attendance.workHours = Math.round((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60) * 100) / 100;
+      }
+    }
+
     const updatedAttendance = await attendance.save();
     res.json(updatedAttendance);
   } catch (error) {
+    console.error('Update error:', error);
     res.status(400).json({ message: error.message });
   }
 };
+
+// Helper function to parse time string to Date
+function parseTime(timeStr) {
+  try {
+    const [time, period] = timeStr.split(' ');
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    
+    const date = new Date();
+    let hrs = hours;
+    
+    // Convert to 24-hour format
+    if (period === 'PM' && hours !== 12) hrs += 12;
+    if (period === 'AM' && hours === 12) hrs = 0;
+    
+    date.setHours(hrs, minutes, seconds);
+    return date;
+  } catch (error) {
+    console.error('Error parsing time:', error);
+    return null;
+  }
+}
 
 // Delete attendance record
 exports.deleteAttendance = async (req, res) => {

@@ -34,7 +34,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   menuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
     { label: 'Employees', route: '/employees', icon: 'people', adminOnly: true },
-    { label: 'Departments', route: '/departments', icon: 'business', adminOnly: true },
+    // { label: 'Departments', route: '/departments', icon: 'business', adminOnly: false },
     { label: 'Attendance', route: '/attendance', icon: 'schedule' },
     { label: 'Leave', route: '/leave', icon: 'event_busy' },
     { label: 'Reports', route: '/reports', icon: 'assessment' },

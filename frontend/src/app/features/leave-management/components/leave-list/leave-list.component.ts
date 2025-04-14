@@ -1,20 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LeaveService, Leave } from '@app/core/services/leave.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { LeaveRequestFormComponent } from '../leave-request-form/leave-request-form.component';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-leave-list',
   templateUrl: './leave-list.component.html',
   styleUrls: ['./leave-list.component.scss']
 })
-export class LeaveListComponent implements OnInit {
+export class LeaveListComponent implements OnInit, OnDestroy {
   leaves: Leave[] = [];
   displayedColumns: string[] = ['employeeName', 'type', 'startDate', 'endDate', 'duration', 'reason', 'status', 'actions'];
   isLoading = false;
   isAdmin = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private leaveService: LeaveService,
@@ -32,19 +35,27 @@ export class LeaveListComponent implements OnInit {
     this.loadLeaveRequests();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   loadLeaveRequests(): void {
     this.isLoading = true;
-    this.leaveService.getLeaves().subscribe({
-      next: (leaves: Leave[]) => {
-        this.leaves = leaves;
-        this.isLoading = false;
-      },
-      error: (error: Error) => {
-        console.error('Error loading leave requests:', error);
-        this.snackBar.open('Error loading leave requests', 'Close', { duration: 3000 });
-        this.isLoading = false;
-      }
-    });
+    this.leaveService.getLeaves()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (leaves: Leave[]) => {
+          console.log('Received leaves:', leaves);
+          this.leaves = [...leaves];  // Create a new array reference
+          this.isLoading = false;
+        },
+        error: (error: Error) => {
+          console.error('Error loading leave requests:', error);
+          this.snackBar.open('Error loading leave requests', 'Close', { duration: 3000 });
+          this.isLoading = false;
+        }
+      });
   }
 
   openLeaveRequestDialog(): void {
@@ -54,12 +65,14 @@ export class LeaveListComponent implements OnInit {
       data: { isAdmin: this.isAdmin }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Add the new leave request to the list immediately
-        this.leaves = [...this.leaves, result];
-      }
-    });
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result) {
+          console.log('Dialog closed with result:', result);
+          // The list will update automatically through the BehaviorSubject
+        }
+      });
   }
 
   updateStatus(leaveId: string, status: 'approved' | 'rejected'): void {
@@ -69,17 +82,19 @@ export class LeaveListComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.leaveService.updateLeave(leaveId, { status }).subscribe({
-      next: () => {
-        this.snackBar.open(`Leave request ${status}`, 'Close', { duration: 3000 });
-        this.loadLeaveRequests();
-      },
-      error: (error: Error) => {
-        console.error('Error updating leave request:', error);
-        this.snackBar.open('Error updating leave request', 'Close', { duration: 3000 });
-        this.isLoading = false;
-      }
-    });
+    this.leaveService.updateLeave(leaveId, { status })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.snackBar.open(`Leave request ${status}`, 'Close', { duration: 3000 });
+          this.loadLeaveRequests();
+        },
+        error: (error: Error) => {
+          console.error('Error updating leave request:', error);
+          this.snackBar.open('Error updating leave request', 'Close', { duration: 3000 });
+          this.isLoading = false;
+        }
+      });
   }
 
   getStatusColor(status: string): string {

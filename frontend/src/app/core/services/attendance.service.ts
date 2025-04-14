@@ -83,40 +83,35 @@ export class AttendanceService {
       return throwError(() => new Error('ID is required'));
     }
 
-    return this.getAttendanceById(id).pipe(
-      switchMap((attendance: Attendance) => {
-        const updatedAttendance = {
-          ...attendance,
-          checkOut: new Date().toLocaleTimeString(),
-          workHours: this.calculateWorkHours(attendance.checkIn)
-        };
-        return this.updateAttendance(id, updatedAttendance);
-      })
-    );
-  }
+    const checkOutTime = new Date().toLocaleTimeString();
+    console.log('Checking out at:', checkOutTime);
 
-  private calculateWorkHours(checkInTime: string): number {
-    const checkIn = this.parseTime(checkInTime);
-    const now = new Date();
-    if (!checkIn) return 0;
-    
-    const diffHours = (now.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
-    return Math.round(diffHours * 100) / 100; // Round to 2 decimal places
+    const updatedAttendance: Partial<Attendance> = {
+      checkOut: checkOutTime
+    };
+
+    return this.http.put<Attendance>(`${this.apiUrl}/${id}`, updatedAttendance);
   }
 
   private parseTime(timeStr: string): Date | null {
-    if (!timeStr) return null;
-    const [time, period] = timeStr.split(' ');
-    const [hours, minutes] = time.split(':').map(Number);
-    
-    const date = new Date();
-    let hrs = hours;
-    
-    // Convert to 24-hour format
-    if (period === 'PM' && hours !== 12) hrs += 12;
-    if (period === 'AM' && hours === 12) hrs = 0;
-    
-    date.setHours(hrs, minutes);
-    return date;
+    try {
+      console.log('Parsing time string:', timeStr);
+      const [time, period] = timeStr.split(' ');
+      const [hours, minutes, seconds] = time.split(':').map(Number);
+      
+      const date = new Date();
+      let hrs = hours;
+      
+      // Convert to 24-hour format
+      if (period === 'PM' && hours !== 12) hrs += 12;
+      if (period === 'AM' && hours === 12) hrs = 0;
+      
+      date.setHours(hrs, minutes, seconds);
+      console.log('Parsed date:', date);
+      return date;
+    } catch (error) {
+      console.error('Error parsing time:', error);
+      return null;
+    }
   }
 }

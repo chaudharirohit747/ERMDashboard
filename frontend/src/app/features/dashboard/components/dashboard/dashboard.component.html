@@ -1,14 +1,24 @@
 <div class="dashboard-container">
   <!-- Stats Cards -->
   <div class="stats-grid">
-    <mat-card *ngFor="let card of cards" class="stats-card" [style.borderColor]="card.color">
-      <mat-card-content>
-        <div class="card-info">
-          <h3>{{card.title}}</h3>
-          <h2>{{card.value}}</h2>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <ng-container *ngIf="!cardsError; else cardsErrorTpl">
+      <mat-card *ngFor="let card of cards" class="stats-card" [style.borderColor]="card.color">
+        <mat-card-content>
+          <div class="card-info">
+            <h3>{{card.title}}</h3>
+            <h2>
+              <ng-container *ngIf="!isCardsLoading; else loadingValue">
+                {{card.value}}
+              </ng-container>
+              <ng-template #loadingValue>
+                <mat-spinner diameter="20"></mat-spinner>
+              </ng-template>
+            </h2>
+          </div>
+          <mat-icon [style.color]="card.color">{{card.icon}}</mat-icon>
+        </mat-card-content>
+      </mat-card>
+    </ng-container>
   </div>
 
   <!-- Charts Section -->
@@ -18,28 +28,35 @@
         <mat-card-title>Employee Growth</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <canvas baseChart
-          [type]="'line'"
-          [data]="{
-            labels: employeeChart.labels,
-            datasets: [{
-              label: 'Total Employees',
-              data: employeeChart.data,
-              borderColor: '#1976d2',
-              tension: 0.4
-            }]
-          }"
-          [options]="{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true,
-                position: 'top'
-              }
-            }
-          }">
-        </canvas>
+        <ng-container *ngIf="!employeeChartError; else employeeChartErrorTpl">
+          <div class="chart-container" [class.loading]="isEmployeeChartLoading">
+            <canvas baseChart
+              [type]="'line'"
+              [data]="{
+                labels: employeeChart.labels,
+                datasets: [{
+                  label: 'Total Employees',
+                  data: employeeChart.data,
+                  borderColor: '#1976d2',
+                  tension: 0.4
+                }]
+              }"
+              [options]="{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'top'
+                  }
+                }
+              }">
+            </canvas>
+            <div *ngIf="isEmployeeChartLoading" class="loading-overlay">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          </div>
+        </ng-container>
       </mat-card-content>
     </mat-card>
 
@@ -48,29 +65,36 @@
         <mat-card-title>Department Distribution</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <canvas baseChart
-          [type]="'doughnut'"
-          [data]="{
-            labels: departmentChart.labels,
-            datasets: [{
-              data: departmentChart.data,
-              backgroundColor: [
-                '#1976d2',
-                '#388e3c',
-                '#f57c00',
-                '#d32f2f',
-                '#7b1fa2',
-                '#c2185b',
-                '#0097a7',
-                '#fbc02d'
-              ]
-            }]
-          }"
-          [options]="{
-            responsive: true,
-            maintainAspectRatio: false
-          }">
-        </canvas>
+        <ng-container *ngIf="!departmentChartError; else departmentChartErrorTpl">
+          <div class="chart-container" [class.loading]="isDepartmentChartLoading">
+            <canvas baseChart
+              [type]="'doughnut'"
+              [data]="{
+                labels: departmentChart.labels,
+                datasets: [{
+                  data: departmentChart.data,
+                  backgroundColor: [
+                    '#1976d2',
+                    '#388e3c',
+                    '#f57c00',
+                    '#d32f2f',
+                    '#7b1fa2',
+                    '#c2185b',
+                    '#0097a7',
+                    '#fbc02d'
+                  ]
+                }]
+              }"
+              [options]="{
+                responsive: true,
+                maintainAspectRatio: false
+              }">
+            </canvas>
+            <div *ngIf="isDepartmentChartLoading" class="loading-overlay">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          </div>
+        </ng-container>
       </mat-card-content>
     </mat-card>
   </div>
@@ -81,12 +105,55 @@
       <mat-card-title>Recent Activities</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <mat-list>
-        <mat-list-item *ngFor="let activity of recentActivities">
-          <div matListItemTitle>{{activity.message}}</div>
-          <div matListItemLine>{{activity.time}}</div>
-        </mat-list-item>
-      </mat-list>
+      <ng-container *ngIf="!activitiesError; else activitiesErrorTpl">
+        <div class="activities-container" [class.loading]="isActivitiesLoading">
+          <mat-list>
+            <mat-list-item *ngFor="let activity of recentActivities">
+              <mat-icon matListItemIcon [style.color]="activity.type === 'new_hire' ? '#f57c00' : '#d32f2f'">
+                {{getActivityIcon(activity.type)}}
+              </mat-icon>
+              <div matListItemTitle>{{activity.message}}</div>
+              <div matListItemLine>{{formatActivityTime(activity.time)}}</div>
+            </mat-list-item>
+          </mat-list>
+          <div *ngIf="isActivitiesLoading" class="loading-overlay">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        </div>
+      </ng-container>
     </mat-card-content>
   </mat-card>
 </div>
+
+<!-- Error Templates -->
+<ng-template #cardsErrorTpl>
+  <div class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{cardsError}}</p>
+    <button mat-button color="primary" (click)="retryLoad('cards')">Retry</button>
+  </div>
+</ng-template>
+
+<ng-template #employeeChartErrorTpl>
+  <div class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{employeeChartError}}</p>
+    <button mat-button color="primary" (click)="retryLoad('employeeChart')">Retry</button>
+  </div>
+</ng-template>
+
+<ng-template #departmentChartErrorTpl>
+  <div class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{departmentChartError}}</p>
+    <button mat-button color="primary" (click)="retryLoad('departmentChart')">Retry</button>
+  </div>
+</ng-template>
+
+<ng-template #activitiesErrorTpl>
+  <div class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{activitiesError}}</p>
+    <button mat-button color="primary" (click)="retryLoad('activities')">Retry</button>
+  </div>
+</ng-template>

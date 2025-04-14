@@ -158,13 +158,27 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
   private findTodayRecord(): void {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const currentUser = this.authService.getCurrentUser();
     
-    this.todayRecord = this.attendanceRecords.find(record => {
+    if (!currentUser?._id) {
+      console.error('No current user found');
+      return;
+    }
+
+    const todayRecord = this.attendanceRecords.find(record => {
       const recordDate = new Date(record.date);
       recordDate.setHours(0, 0, 0, 0);
       return recordDate.getTime() === today.getTime() && 
-             record.employeeId === this.authService.getCurrentUser()?._id;
-    }) || null;
+             record.employeeId === currentUser._id;
+    });
+
+    if (todayRecord) {
+      console.log('Found today\'s record:', todayRecord);
+      this.todayRecord = todayRecord;
+    } else {
+      console.log('No attendance record found for today');
+      this.todayRecord = null;
+    }
   }
 
   checkIn(): void {
@@ -188,10 +202,12 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
 
   checkOut(): void {
     if (!this.todayRecord?._id) {
+      console.error('No active check-in found. Today\'s record:', this.todayRecord);
       this.snackBar.open('No active check-in found', 'Close', { duration: 3000 });
       return;
     }
 
+    console.log('Checking out with record ID:', this.todayRecord._id);
     this.attendanceService.checkOut(this.todayRecord._id).subscribe({
       next: () => {
         this.snackBar.open('Successfully checked out', 'Close', { duration: 3000 });
@@ -199,7 +215,13 @@ export class AttendanceListComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Check-out error:', error);
-        this.snackBar.open(error.message || 'Error checking out', 'Close', { duration: 3000 });
+        if (error.status === 404) {
+          this.snackBar.open('Attendance record not found. Please check in first.', 'Close', { duration: 3000 });
+        } else {
+          this.snackBar.open(error.message || 'Error checking out', 'Close', { duration: 3000 });
+        }
+        // Reload records to ensure we have the latest state
+        this.loadAttendanceRecords();
       }
     });
   }

@@ -71,9 +71,11 @@ export class AuthService {
   }
 
   logout(): void {
-    this.http.post(`${this.apiUrl}/logout`, {}).subscribe(() => {
-      this.setCurrentUser(null);
-    });
+    // Clear session storage first
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('currentUser');
+    // Clear the current user subject
+    this.setCurrentUser(null);
   }
 
   getCurrentUser(): User | null {

@@ -6,6 +6,7 @@ const userRoutes = require('./routes/user.routes');
 const attendanceRoutes = require('./routes/attendance.routes');
 const employeeRoutes = require('./routes/employee.routes');
 const departmentRoutes = require('./routes/department.routes');
+const dashboardController = require('./controllers/dashboard.controller');
 
 const app = express();
 
@@ -24,6 +25,12 @@ app.use('/api/users', userRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/departments', departmentRoutes);
+
+// Dashboard routes
+app.get('/api/dashboard/stats', dashboardController.getDashboardStats);
+app.get('/api/dashboard/employee-growth', dashboardController.getEmployeeGrowth);
+app.get('/api/dashboard/department-distribution', dashboardController.getDepartmentDistribution);
+app.get('/api/dashboard/recent-activities', dashboardController.getRecentActivities);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

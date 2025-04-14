@@ -60,37 +60,28 @@ export class LeaveRequestFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.leaveForm.valid && !this.isSubmitting) {
-      const currentUser = this.authService.getCurrentUser();
-      if (!currentUser) {
-        this.snackBar.open('Please log in to submit a leave request', 'Close', { duration: 3000 });
-        this.router.navigate(['/login']);
-        return;
-      }
-
+    if (this.leaveForm.valid) {
       this.isSubmitting = true;
       const formValue = this.leaveForm.value;
+      const duration = this.getDuration();
 
       const leaveRequest = {
-        employeeId: currentUser._id,
-        employeeName: currentUser.name || 'Unknown',
-        type: formValue.type,
-        startDate: new Date(formValue.startDate),
-        endDate: new Date(formValue.endDate),
-        duration: this.getDuration(),
-        reason: formValue.reason,
-        status: 'pending' as const
+        ...formValue,
+        duration,
+        employeeId: this.authService.getCurrentUser()?._id,
+        employeeName: this.authService.getCurrentUser()?.name,
+        status: 'pending'
       };
 
       this.leaveService.createLeave(leaveRequest).subscribe({
-        next: (createdRequest) => {
+        next: (response) => {
           this.snackBar.open('Leave request submitted successfully', 'Close', { duration: 3000 });
-          // Close dialog with the created request to update the list immediately
-          this.dialogRef.close(createdRequest);
+          this.isSubmitting = false;
+          this.dialogRef.close(response);
         },
-        error: (error: Error) => {
+        error: (error) => {
           console.error('Error submitting leave request:', error);
-          this.snackBar.open(error.message || 'Failed to submit leave request', 'Close', { duration: 3000 });
+          this.snackBar.open('Error submitting leave request', 'Close', { duration: 3000 });
           this.isSubmitting = false;
         }
       });
