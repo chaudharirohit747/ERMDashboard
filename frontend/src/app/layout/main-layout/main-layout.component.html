@@ -24,9 +24,9 @@
     <mat-toolbar color="primary">
       <span class="page-title">{{getCurrentPageTitle()}}</span>
       <span class="toolbar-spacer"></span>
-      <span class="user-name">{{userName}}</span>
+      <span class="user-name">Welcome, {{userName}}</span>
       <button mat-icon-button [matMenuTriggerFor]="userMenu">
-        <mat-icon aria-hidden="false" aria-label="User account">{{userName}}</mat-icon>
+        <mat-icon aria-hidden="false" aria-label="User account">account_circle</mat-icon>
       </button>
       <mat-menu #userMenu="matMenu">
         <button mat-menu-item (click)="logout()">

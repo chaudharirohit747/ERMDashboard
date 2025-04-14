@@ -6,10 +6,10 @@
         <span class="period">{{currentTime | date:'a'}}</span>
       </div>
       <div class="date">{{currentTime | date:'EEEE, MMMM d, yyyy'}}</div>
-      <div class="duration" *ngIf="todayRecord?.checkIn">
+      <!-- <div class="duration" *ngIf="todayRecord?.checkIn">
         <mat-icon>timer</mat-icon>
         <span>{{calculateDuration(todayRecord?.checkIn)}} hours</span>
-      </div>
+      </div> -->
     </div>
 
     <div class="action-buttons">
