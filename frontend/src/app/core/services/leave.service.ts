@@ -101,7 +101,24 @@ export class LeaveService {
   }
 
   getLeaves(): Observable<Leave[]> {
-    return this.leaves$;
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return this.leaves$;
+
+    // If user is admin, get all leaves, otherwise get only their leaves
+    if (this.authService.isAdmin()) {
+      return this.http.get<Leave[]>(this.apiUrl).pipe(
+        map(leaves => leaves.map(leave => ({
+          ...leave,
+          startDate: new Date(leave.startDate),
+          endDate: new Date(leave.endDate),
+          createdAt: leave.createdAt ? new Date(leave.createdAt) : undefined,
+          updatedAt: leave.updatedAt ? new Date(leave.updatedAt) : undefined,
+          approvalDate: leave.approvalDate ? new Date(leave.approvalDate) : undefined
+        })))
+      );
+    } else {
+      return this.leaves$;
+    }
   }
 
   getEmployeeLeaves(employeeId: string): Observable<Leave[]> {

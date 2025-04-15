@@ -47,13 +47,18 @@ export class LeaveListComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (leaves: Leave[]) => {
           console.log('Received leaves:', leaves);
-          this.leaves = [...leaves];  // Create a new array reference
+          this.leaves = leaves.sort((a, b) => {
+            // Sort by status (pending first) and then by date
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (a.status !== 'pending' && b.status === 'pending') return 1;
+            return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+          });
           this.isLoading = false;
         },
-        error: (error: Error) => {
-          console.error('Error loading leave requests:', error);
-          this.snackBar.open('Error loading leave requests', 'Close', { duration: 3000 });
+        error: (error) => {
+          console.error('Error loading leaves:', error);
           this.isLoading = false;
+          this.snackBar.open('Error loading leave requests', 'Close', { duration: 3000 });
         }
       });
   }
