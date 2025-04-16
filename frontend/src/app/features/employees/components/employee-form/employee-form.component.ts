@@ -30,7 +30,7 @@ export class EmployeeFormComponent implements OnInit {
       departmentId: [data?.departmentId || '', [Validators.required]],
       position: [data?.position || '', [Validators.required]],
       hireDate: [data?.hireDate || new Date(), [Validators.required]],
-      // salary: [data?.salary || 0, [Validators.required, Validators.min(0)]]
+      salary: [data?.salary || 0, [Validators.min(0)]]
     });
   }
 
